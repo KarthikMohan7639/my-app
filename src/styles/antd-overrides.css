@@ -1,0 +1,43 @@
+/* Ant Design React 19 Compatibility Overrides */
+
+/* Suppress hydration warnings for Ant Design components */
+.ant-message,
+.ant-notification,
+.ant-modal,
+.ant-drawer,
+.ant-tooltip,
+.ant-popover {
+  /* Ensure proper rendering with React 19 */
+  contain: layout style paint;
+}
+
+/* Fix any potential styling issues with React 19 */
+.ant-btn,
+.ant-input,
+.ant-form-item,
+.ant-card {
+  /* Ensure consistent rendering */
+  box-sizing: border-box;
+}
+
+/* Custom styles for better React 19 compatibility */
+.ant-layout {
+  min-height: 100vh;
+}
+
+/* Ensure proper z-index stacking */
+.ant-message {
+  z-index: 9999;
+}
+
+.ant-notification {
+  z-index: 9998;
+}
+
+.ant-modal {
+  z-index: 9997;
+}
+
+.ant-drawer {
+  z-index: 9996;
+}
