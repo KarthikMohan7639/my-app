@@ -1,3 +1,4 @@
+
 import { test } from '@playwright/test';
 
 
@@ -32,9 +33,7 @@ test.describe('Auth Flow', () => {
     await page.click('button[type="submit"]');
 
     // Wait for registration to complete and login form to appear
-    await page.waitForSelector('input[placeholder="Email"]');
 
-    // 4. Fill login form
     await page.fill('input[placeholder="Email"]', email);
     await page.fill('input[placeholder="Password"]', password);
     await page.click('button[type="submit"]');
