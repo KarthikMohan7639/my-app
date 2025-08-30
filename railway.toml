@@ -1,0 +1,21 @@
+# Railway deployment configuration
+# This file configures your Railway deployment
+
+# Build command (can be overridden in Railway dashboard)
+# Railway will use the build script defined in package.json
+
+# Environment variables required:
+# DATABASE_URL - Automatically provided by Railway PostgreSQL
+# JWT_SECRET - Set this to a secure random string
+# NEXTAUTH_URL - Set to your Railway app URL
+# NEXTAUTH_SECRET - Set this to a secure random string
+
+# Railway will automatically:
+# 1. Install dependencies with npm ci
+# 2. Run the build command
+# 3. Start the application with npm start
+
+# To deploy:
+# 1. Connect your GitHub repo to Railway
+# 2. Set the required environment variables
+# 3. Railway will automatically deploy on every push to main branch
