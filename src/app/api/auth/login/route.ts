@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/dbConfig/dbConnect';
+import clientPromise from '@/dbConfig/mongoConnect';
 import { verifyPassword } from '@/helpers/hashPassword';
 import { generateToken } from '@/helpers/jwt';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,11 +15,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+
+    // Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db();
+    const users = db.collection('users');
+
     // Find user
-    const user = await prisma.user.findUnique({ 
-      where: { email } 
-    });
-    
+    const user = await users.findOne({ email });
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -28,6 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
+
     const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -37,18 +41,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate token
+
     const token = generateToken({
-      userId: user.id,
+      userId: user._id.toString(),
       email: user.email,
       username: user.username,
     });
 
     // Create response
+
     const response = NextResponse.json(
       {
         message: 'Login successful',
         user: {
-          id: user.id,
+          id: user._id.toString(),
           username: user.username,
           email: user.email,
           isVerified: user.isVerified,

@@ -1,4 +1,4 @@
-import prisma from '@/dbConfig/dbConnect';
+import clientPromise from '@/dbConfig/mongoConnect';
 import { hashPassword } from '@/helpers/hashPassword';
 import { generateToken } from '@/helpers/jwt';
 import { NextRequest, NextResponse } from 'next/server';
@@ -23,8 +23,13 @@ export async function POST(request: NextRequest) {
     }
 
 
+    // Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db();
+    const users = db.collection('users');
+
     // Check if email already exists
-    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    const existingEmail = await users.findOne({ email });
     if (existingEmail) {
       return NextResponse.json(
         { error: 'Email already exists' },
@@ -32,8 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Optionally, check if username already exists (optional, can keep or remove)
-    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    // Optionally, check if username already exists
+    const existingUsername = await users.findOne({ username });
     if (existingUsername) {
       return NextResponse.json(
         { error: 'Username already exists' },
@@ -45,27 +50,35 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hashPassword(password);
 
     // Create user
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
+    const result = await users.insertOne({
+      username,
+      email,
+      password: hashedPassword,
+      isVerified: false,
+      isAdmin: false,
     });
+    const user = await users.findOne({ _id: result.insertedId });
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User creation failed' },
+        { status: 500 }
+      );
+    }
 
     // Generate token
     const token = generateToken({
-      userId: user.id,
+      userId: user._id.toString(),
       email: user.email,
       username: user.username,
     });
 
     // Create response
+
     const response = NextResponse.json(
       {
         message: 'User created successfully',
         user: {
-          id: user.id,
+          id: user._id.toString(),
           username: user.username,
           email: user.email,
           isVerified: user.isVerified,

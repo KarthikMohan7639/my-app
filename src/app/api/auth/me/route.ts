@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/dbConfig/dbConnect';
+import clientPromise from '@/dbConfig/mongoConnect';
 import { verifyToken } from '@/helpers/jwt';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,17 +21,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        isVerified: true,
-        isAdmin: true,
-      }
-    });
+    // Connect to MongoDB
+    const client = await clientPromise;
+    const db = client.db();
+    const users = db.collection('users');
 
+    // Find user by _id
+    const { ObjectId } = require('mongodb');
+    let user;
+    try {
+      user = await users.findOne({ _id: new ObjectId(payload.userId) });
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'Invalid user ID' },
+        { status: 400 }
+      );
+    }
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -41,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       user: {
-        id: user.id,
+        id: user._id.toString(),
         username: user.username,
         email: user.email,
         isVerified: user.isVerified,
