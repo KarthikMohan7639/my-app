@@ -1,0 +1,49 @@
+{
+  "name": "Deploy My Next.js App",
+  "description": "A Next.js authentication app with Prisma and MySQL/PostgreSQL",
+  "keywords": ["nextjs", "authentication", "prisma", "mysql", "postgresql"],
+  "website": "https://github.com/KarthikMohan7639/my-app",
+  "repository": "https://github.com/KarthikMohan7639/my-app",
+  "logo": "https://nextjs.org/static/favicon/android-chrome-192x192.png",
+  "success_url": "/",
+  "scripts": {
+    "dokku": {
+      "predeploy": "npm run db:generate && npm run db:push"
+    }
+  },
+  "env": {
+    "DATABASE_URL": {
+      "description": "Database connection string",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT tokens (minimum 32 characters)",
+      "generator": "secret",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production"
+    },
+    "NEXTAUTH_URL": {
+      "description": "The URL of your application",
+      "required": true
+    },
+    "NEXTAUTH_SECRET": {
+      "description": "Secret for NextAuth.js",
+      "generator": "secret",
+      "required": true
+    }
+  },
+  "addons": [
+    {
+      "plan": "jawsdb:kitefin",
+      "as": "DATABASE"
+    }
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
